@@ -47,6 +47,30 @@ class BaseEntity extends Collection
         $this->put(Str::camel($name), $value);
     }
 
+    public function offsetGet($key): mixed
+    {
+        $this->assertValidPropertyKey($key);
+        return $this->getPropertyValue($key);
+    }
+
+    public function offsetSet($key, $value): void
+    {
+        $this->assertValidPropertyKey($key);
+        parent::offsetSet(Str::camel($key), $value);
+    }
+
+    public function offsetExists($key): bool
+    {
+        $this->assertValidPropertyKey($key);
+        return $this->hasPropertyValue($key);
+    }
+
+    public function offsetUnset($key): void
+    {
+        $this->assertValidPropertyKey($key);
+        parent::offsetUnset(Str::camel($key));
+    }
+
     public function __isset(string $name): bool
     {
         return $this->hasPropertyValue($name);
@@ -55,14 +79,14 @@ class BaseEntity extends Collection
     /**
      * Magically map to an object class (if exists) and return data.
      *
-     * @param  string  $originalProperty
-     * @param  null  $default
+     * @param  string  $key
+     * @param  null    $default
      *
      * @return mixed
      */
-    protected function getPropertyValue(string $originalProperty, mixed $default = null): mixed
+    protected function getPropertyValue(string $key, mixed $default = null): mixed
     {
-        $property = Str::camel($originalProperty);
+        $property = Str::camel($key);
 
         $valueRaw = $this->offsetExists($property)
             ? $this->items[$property]
@@ -79,9 +103,15 @@ class BaseEntity extends Collection
         return $valueRaw;
     }
 
-    protected function hasPropertyValue(string $originalProperty): bool
+    protected function hasPropertyValue(string $key): bool
     {
-        $property = Str::camel($originalProperty);
-        return $this->offsetExists($property);
+        return isset($this->items[Str::camel($key)]) || $this->hasGetter($key);
+    }
+
+    protected function assertValidPropertyKey(string $key): void
+    {
+        if (! is_string($key)) {
+            throw new \InvalidArgumentException('Key must be a string');
+        }
     }
 }

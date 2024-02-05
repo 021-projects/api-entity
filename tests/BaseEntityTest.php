@@ -138,4 +138,16 @@ class BaseEntityTest extends TestCase
         $this->assertCount(2, $users);
         $this->assertInstanceOf(User::class, $users->first());
     }
+
+    public function test_array_access(): void
+    {
+        $this->assertEquals(1, $this->user['id']);
+        $this->assertEquals('John', $this->user['firstName']);
+        $this->assertEquals('Doe', $this->user['lastName']);
+        $this->assertEquals('Offline', $this->user['onlineStatus']);
+        $this->assertInstanceOf(UserProfile::class, $this->user['profile']);
+        $this->assertEquals('I am John Doe', $this->user['profile']['bio']);
+        $this->assertInstanceOf(Collection::class, $this->user['settings']);
+        $this->assertInstanceOf(Dog::class, $this->user['dogs'][0]);
+    }
 }
