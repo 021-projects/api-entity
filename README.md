@@ -1,7 +1,6 @@
 # It's even easier to develop SDKs for your APIs
 <a href="https://packagist.org/packages/021/api-entity"><img src="https://img.shields.io/packagist/v/021/api-entity" alt="Latest Stable Version"></a>
 [![run-tests](https://github.com/021-projects/api-entity/actions/workflows/run-tests.yml/badge.svg)](https://github.com/021-projects/api-entity/actions/workflows/run-tests.yml)
-[![cov](https://021-projects.github.io/api-entity/badges/coverage.svg)](https://github.com/021-projects/api-entity/actions)
 <a href="https://packagist.org/packages/021/api-entity"><img src="https://img.shields.io/packagist/dt/021/api-entity" alt="Total Downloads"></a>
 <a href="https://packagist.org/packages/021/api-entity"><img src="https://img.shields.io/packagist/l/021/api-entity" alt="License"></a>
 
