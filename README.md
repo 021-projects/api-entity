@@ -6,7 +6,7 @@
 
 This package allows you to quickly and conveniently interpret JSON data into PHP classes.
 
-## Support Me
+## Support
 If you like this package, you can support me by donating some cryptocurrency:
 #### Bitcoin
 1G4U12A7VVVaUrmj4KmNt4C5SaDmCXuW49
