@@ -1,6 +1,7 @@
 {
     "name": "021/api-entity",
     "type": "library",
+    "description": "Quickly and conveniently interpret JSON data into PHP classes",
     "license": "MIT",
     "authors": [
         {
