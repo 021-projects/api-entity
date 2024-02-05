@@ -21,6 +21,10 @@ class BaseEntity extends Collection
         parent::__construct($props);
     }
 
+    /**
+     * @param  array  $items
+     * @return \Illuminate\Support\Collection<static>
+     */
     public static function collectMany(array $items): Collection
     {
         return collect($items)->map(fn($item) => new static($item));
