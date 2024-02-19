@@ -25,6 +25,7 @@ composer require 021/api-entity
 ```
 
 ## Usage
+
 ```php
 use O21\ApiEntity\BaseEntity;
 use O21\ApiEntity\Casts\Getter;
@@ -59,7 +60,17 @@ class User extends BaseEntity
     }
 }
 
-$user = new User(json_props($api->get('/user/1')));
+/** @var \Psr\Http\Message\ResponseInterface $response */
+$response = $api->get('/user/1');
+
+// Get decoded JSON array from response
+// which is a PSR-7 response or JSON string
+$props = json_props($response);
+// Create User object from JSON props
+$user = new User($props);
+
+// Or just pass response to BaseEntity constructor
+$user = new User($response);
 
 echo $user->fullName; // John Doe
 echo $user->full_name; // John Doe
