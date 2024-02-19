@@ -31,6 +31,8 @@ use O21\ApiEntity\Casts\Getter;
 use SDK\Entities\UserProfile; // Your custom class
 use SDK\Entities\UserPet; // Your custom class
 
+use function O21\ApiEntity\Response\json_props;
+
 /**
  * Class User
  * @package SDK\Entities
@@ -57,9 +59,7 @@ class User extends BaseEntity
     }
 }
 
-$json = $api->get('/user/1');
-$props = json_decode($json, true);
-$user = new User($props);
+$user = new User(json_props($api->get('/user/1')));
 
 echo $user->fullName; // John Doe
 echo $user->full_name; // John Doe
