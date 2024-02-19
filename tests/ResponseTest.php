@@ -81,6 +81,28 @@ class ResponseTest extends TestCase
         $this->assertEquals('I am John Doe', $user->profile->bio);
     }
 
+    public function test_base_entity_parse_response(): void
+    {
+        $user = new User($this->mockResponse());
+
+        $this->assertEquals(1, $user->id);
+        $this->assertEquals('John', $user->firstName);
+        $this->assertEquals('Doe', $user->lastName);
+        $this->assertInstanceOf(UserProfile::class, $user->profile);
+        $this->assertEquals('I am John Doe', $user->profile->bio);
+    }
+
+    public function test_base_entity_parse_json_string(): void
+    {
+        $user = new User($this->testJson);
+
+        $this->assertEquals(1, $user->id);
+        $this->assertEquals('John', $user->firstName);
+        $this->assertEquals('Doe', $user->lastName);
+        $this->assertInstanceOf(UserProfile::class, $user->profile);
+        $this->assertEquals('I am John Doe', $user->profile->bio);
+    }
+
     protected function mockResponse(string $json = ''): object
     {
         if ($json === '') {

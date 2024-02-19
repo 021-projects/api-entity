@@ -4,14 +4,21 @@ namespace O21\ApiEntity;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Psr\Http\Message\ResponseInterface;
+
+use function O21\ApiEntity\Response\json_props;
 
 class BaseEntity extends Collection
 {
     use Concerns\HasGetters;
     use Concerns\HasCasts;
 
-    public function __construct(array $props = [])
+    public function __construct(array|string|ResponseInterface $props = [])
     {
+        if (is_string($props) || ($props instanceof ResponseInterface)) {
+            $props = json_props($props);
+        }
+
         if ($props) {
             // convert all keys to camel case
             $keys = array_map([Str::class, 'camel'], array_keys($props));
