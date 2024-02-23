@@ -20,8 +20,7 @@ class BaseEntity extends Collection
         }
 
         if ($props) {
-            // convert all keys to camel case
-            $keys = array_map([Str::class, 'camel'], array_keys($props));
+            $keys = array_map($this->propKey(...), array_keys($props));
             $props = array_combine($keys, $props);
         }
 
@@ -51,7 +50,7 @@ class BaseEntity extends Collection
 
     public function __set(string $name, $value): void
     {
-        $this->put(Str::camel($name), $value);
+        $this->put($this->propKey($name), $value);
     }
 
     public function offsetGet($key): mixed
@@ -63,7 +62,7 @@ class BaseEntity extends Collection
     public function offsetSet($key, $value): void
     {
         $this->assertValidPropertyKey($key);
-        parent::offsetSet(Str::camel($key), $value);
+        parent::offsetSet($this->propKey($key), $value);
     }
 
     public function offsetExists($key): bool
@@ -75,7 +74,7 @@ class BaseEntity extends Collection
     public function offsetUnset($key): void
     {
         $this->assertValidPropertyKey($key);
-        parent::offsetUnset(Str::camel($key));
+        parent::offsetUnset($this->propKey($key));
     }
 
     public function __isset(string $name): bool
@@ -93,7 +92,7 @@ class BaseEntity extends Collection
      */
     protected function getPropertyValue(string $key, mixed $default = null): mixed
     {
-        $property = Str::camel($key);
+        $property = $this->propKey($key);
 
         $valueRaw = $this->offsetExists($property)
             ? $this->items[$property]
@@ -112,7 +111,7 @@ class BaseEntity extends Collection
 
     protected function hasPropertyValue(string $key): bool
     {
-        return isset($this->items[Str::camel($key)]) || $this->hasGetter($key);
+        return isset($this->items[$this->propKey($key)]) || $this->hasGetter($key);
     }
 
     protected function assertValidPropertyKey(string $key): void
@@ -120,5 +119,15 @@ class BaseEntity extends Collection
         if (! is_string($key)) {
             throw new \InvalidArgumentException('Key must be a string');
         }
+    }
+
+    protected function propKey(string $key): string
+    {
+        // ignore uppercase keys
+        if (strtoupper($key) === $key) {
+            return $key;
+        }
+
+        return Str::camel($key);
     }
 }

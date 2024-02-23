@@ -150,4 +150,11 @@ class BaseEntityTest extends TestCase
         $this->assertInstanceOf(Collection::class, $this->user['settings']);
         $this->assertInstanceOf(Dog::class, $this->user['dogs'][0]);
     }
+
+    public function test_upper_case_keys_not_converting_to_snake(): void
+    {
+        $user = new User(['ID' => 1, 'FirstName' => 'John']);
+        $this->assertEquals(1, $user->ID);
+        $this->assertEquals('John', $user->firstName);
+    }
 }

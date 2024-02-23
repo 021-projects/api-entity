@@ -18,7 +18,7 @@ trait HasGetters
             return static::$getterCache[get_class($this)][$key];
         }
 
-        if (! method_exists($this, $method = Str::camel($key))) {
+        if (! method_exists($this, $method = $this->propKey($key))) {
             return static::$getterCache[get_class($this)][$key] = false;
         }
 
@@ -36,7 +36,7 @@ trait HasGetters
             return $this->extractedGetters[$key];
         }
 
-        $getterMethod = Str::camel($key);
+        $getterMethod = $this->propKey($key);
 
         /** @var \O21\ApiEntity\Casts\Getter $getter */
         $getter = $this->$getterMethod();
