@@ -48,6 +48,7 @@ class BaseEntityTest extends TestCase
             ['name' => 'Rex', 'age' => 5],
         ],
         'invalid_cast'   => '1111',
+        'string_timestamp' => '1712922269',
         'wallet_balance' => '100.00',
         'big_number'     => 100_000_000,
         'empty_dog'      => null
@@ -112,6 +113,7 @@ class BaseEntityTest extends TestCase
         $this->assertIsFloat($this->user->walletBalance);
         $this->assertIsString($this->user->bigNumber);
         $this->assertNull($this->user->emptyDog);
+        $this->assertEquals('1712922269', $this->user->stringTimestamp->timestamp);
     }
 
     public function test_getters(): void

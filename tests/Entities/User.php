@@ -32,6 +32,7 @@ use O21\ApiEntity\Casts\Getter;
  * @property float $walletBalance
  * @property string $bigNumber
  * @property \Tests\Entities\Dog|null $emptyDog
+ * @property-read \Carbon\Carbon $stringTimestamp
  */
 class User extends BaseEntity
 {
@@ -50,6 +51,7 @@ class User extends BaseEntity
         'walletBalance' => 'float',
         'bigNumber'     => 'string',
         'emptyDog'      => Dog::class,
+        'stringTimestamp' => 'datetime',
     ];
 
     public function fullName(): Getter

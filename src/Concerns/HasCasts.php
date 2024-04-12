@@ -87,9 +87,13 @@ trait HasCasts
                 return collect($value)->map(static fn($prop) => new $arg($prop));
             case 'datetime':
             case 'date':
-                return Date::parse($value);
+                return is_numeric($value)
+                    ? Date::createFromTimestamp((int)$value)
+                    : Date::parse($value);
             case 'timestamp':
-                return Date::parse($value)->timestamp;
+                return is_numeric($value)
+                    ? Date::createFromTimestamp((int)$value)->timestamp
+                    : Date::parse($value)->timestamp;
             default:
                 if (! class_exists($cast)) {
                     return $value;
