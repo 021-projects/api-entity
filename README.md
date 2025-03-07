@@ -26,6 +26,58 @@ composer require 021/api-entity
 
 ## Usage
 
+### After 2.1
+2.1 version introduces an automatically casts parsing from phpdoc. 
+You can use `@property` and `@property-read` annotations to define property types.
+
+```php
+use O21\ApiEntity\BaseEntity;
+use O21\ApiEntity\Casts\Getter;
+use SDK\Entities\UserProfile; // Your custom class
+use SDK\Entities\UserPet; // Your custom class
+
+use function O21\ApiEntity\Response\json_props;
+
+/**
+ * Class User
+ * @package SDK\Entities
+ *
+ * @property int $id
+ * @property string $firstName
+ * @property string $lastName
+ * @property \Carbon\Carbon $registerAt
+ * @property UserProfile $profile
+ * @property \Illuminate\Support\Collection<UserPet> $pets
+ * @property-read string $fullName
+ */
+class User extends BaseEntity
+{
+    public function fullName(): Getter
+    {
+        return Getter::make(fn() => $this->firstName.' '.$this->lastName);
+    }
+}
+
+/** @var \Psr\Http\Message\ResponseInterface $response */
+$response = $api->get('/user/1');
+
+// Get decoded JSON array from response
+// which is a PSR-7 response or JSON string
+$props = json_props($response);
+// Create User object from JSON props
+$user = new User($props);
+
+// Or just pass response to BaseEntity constructor
+$user = new User($response);
+
+echo $user->fullName; // John Doe
+echo $user->full_name; // John Doe
+echo $user->registerAt->format('Y-m-d H:i:s'); // 2022-01-01 00:00:00
+echo $user->profile->phone; // +1234567890
+echo $user->pets->first()->name; // Archy
+```
+
+### Before 2.1
 ```php
 use O21\ApiEntity\BaseEntity;
 use O21\ApiEntity\Casts\Getter;
@@ -49,9 +101,9 @@ use function O21\ApiEntity\Response\json_props;
 class User extends BaseEntity
 {
     protected array $casts = [
-        'registerAt'     => 'datetime',
-        'profile'        => UserProfile::class,
-        'pets'           => 'collection:'.UserPet::class,
+        'registerAt' => 'datetime',
+        'profile' => UserProfile::class,
+        'pets' => 'collection:'.UserPet::class,
     ];
 
     public function fullName(): Getter
