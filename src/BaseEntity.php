@@ -12,6 +12,7 @@ class BaseEntity extends Collection
 {
     use Concerns\HasGetters;
     use Concerns\HasCasts;
+    use Concerns\HasPhpDocCasts;
 
     public function __construct(array|string|ResponseInterface $props = [])
     {
@@ -23,6 +24,8 @@ class BaseEntity extends Collection
             $keys = array_map($this->propKey(...), array_keys($props));
             $props = array_combine($keys, $props);
         }
+
+        $this->parsePhpDocToCasts();
 
         parent::__construct($props);
     }

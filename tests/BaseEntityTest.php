@@ -5,60 +5,30 @@ namespace Tests;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Date;
+use mysql_xdevapi\CollectionAdd;
+use O21\ApiEntity\Exception\InvalidJsonException;
 use PHPUnit\Framework\TestCase;
+use Tests\Entities\Cat;
+use Tests\Entities\CatBadPhpDoc;
+use Tests\Entities\CatNoPhpDoc;
+use Tests\Entities\CatUuid;
 use Tests\Entities\Dog;
+use Tests\Entities\Food;
+use Tests\Entities\Owner;
+use Tests\Entities\Toy;
 use Tests\Entities\User;
 use Tests\Entities\UserProfile;
+use Tests\Enums\CatColor;
 
 class BaseEntityTest extends TestCase
 {
-    private const TEST_USER = [
-        'id'             => '1',
-        'firstName'      => 'John',
-        'lastName'       => 'Doe',
-        'email'          => 'john@wanna.be',
-        'is_active'      => 0,
-        'online_status'  => false,
-        'last_online'    => '2009-01-01 00:00:00',
-        'created_at'     => '2020-01-01 00:00:00',
-        'updated_at'     => '2020-01-01 00:00:00',
-        'profile'        => [
-            'bio'      => 'I am John Doe',
-            'avatar'   => 'https://example.com/avatar.jpg',
-            'location' => 'New York, NY',
-            'website'  => 'https://example.com',
-            'twitter'  => 'https://twitter.com/johndoe',
-            'facebook' => 'https://facebook.com/johndoe',
-            'github'   => ''
-        ],
-        'ips'            => [
-            '0.0.0.0',
-            '1.1.1.1'
-        ],
-        'settings'       => [
-            'theme' => 'dark',
-            'lang'  => 'en'
-        ],
-        'dogs'           => [
-            ['name' => 'Fido', 'age' => 3],
-            ['name' => 'Rex', 'age' => 5],
-        ],
-        'dogs_array'     => [
-            ['name' => 'Fido', 'age' => 3],
-            ['name' => 'Rex', 'age' => 5],
-        ],
-        'invalid_cast'   => '1111',
-        'string_timestamp' => '1712922269',
-        'wallet_balance' => '100.00',
-        'big_number'     => 100_000_000,
-        'empty_dog'      => null
-    ];
-
+    protected Data $data;
     protected User $user;
 
     protected function setUp(): void
     {
-        $this->user = new User(self::TEST_USER);
+        $this->data = new Data();
+        $this->user = new User($this->data->user());
     }
 
     public function test_props(): void
@@ -136,7 +106,7 @@ class BaseEntityTest extends TestCase
 
     public function test_collect_many(): void
     {
-        $users = User::collectMany([self::TEST_USER, self::TEST_USER]);
+        $users = User::collectMany([$this->data->user(), $this->data->user()]);
         $this->assertCount(2, $users);
         $this->assertInstanceOf(User::class, $users->first());
     }
@@ -158,5 +128,91 @@ class BaseEntityTest extends TestCase
         $user = new User(['ID' => 1, 'FirstName' => 'John']);
         $this->assertEquals(1, $user->ID);
         $this->assertEquals('John', $user->firstName);
+    }
+
+    public function test_php_doc_parsing(): void
+    {
+        $data = $this->data->cat();
+        $cat = new Cat($data);
+
+        $this->assertEquals($data['id'], $cat->id);
+        $this->assertIsInt($cat->id);
+        $this->assertEquals($data['name'], $cat->name);
+        $this->assertIsString($cat->name);
+        $this->assertInstanceOf(CatColor::class, $cat->color);
+        $this->assertEquals(CatColor::tryFrom($data['color']), $cat->color);
+        $this->assertInstanceOf(Carbon::class, $cat->birthday);
+        $this->assertEquals(Date::parse($data['birthday'])->timestamp, $cat->birthday->timestamp);
+        $this->assertInstanceOf(Owner::class, $cat->owner);
+        $this->assertEquals($data['owner']['id'], $cat->owner->id);
+        $this->assertEquals($data['owner']['name'], $cat->owner->name);
+        $this->assertIsArray($cat->toys);
+        $this->assertInstanceOf(Toy::class, $cat->toys[0]);
+        $this->assertEquals($data['toys'][0]['id'], $cat->toys[0]->id);
+        $this->assertEquals($data['toys'][0]['name'], $cat->toys[0]->name);
+        $this->assertIsArray($cat->favoriteToys);
+        $this->assertInstanceOf(Toy::class, $cat->favoriteToys[0]);
+        $this->assertInstanceOf(Collection::class, $cat->favoriteFoods);
+        $this->assertInstanceOf(Food::class, $cat->favoriteFoods->first());
+        $this->assertEquals($data['favoriteFoods'][0]['id'], $cat->favoriteFoods->first()->id);
+        $this->assertEquals($data['favoriteFoods'][0]['name'], $cat->favoriteFoods->first()->name);
+        $this->assertInstanceOf(Food::class, $cat->lovelyFood);
+        $this->assertEquals($data['lovelyFood']['id'], $cat->lovelyFood->id);
+        $this->assertEquals($data['lovelyFood']['name'], $cat->lovelyFood->name);
+        $this->assertInstanceOf(Food::class, $cat->hatedFood);
+        $this->assertEquals($data['hatedFood']['id'], $cat->hatedFood->id);
+        $this->assertEquals($data['hatedFood']['name'], $cat->hatedFood->name);
+        $this->assertIsString($cat->image);
+
+        unset($data['hatedFood']);
+        $cat = new Cat($data);
+
+        $this->assertNull($cat->hatedFood);
+
+        $data['hatedFood'] = null;
+        $cat = new Cat($data);
+
+        $this->assertNull($cat->hatedFood);
+
+        $data['hatedFood'] = false;
+
+        $this->expectException(InvalidJsonException::class);
+        (new Cat($data))->hatedFood;
+    }
+
+    public function test_php_doc_not_overlay(): void
+    {
+        $data = $this->data->cat();
+        $cat = new CatUuid($data);
+
+        $this->assertIsString($cat->id);
+    }
+
+    public function test_casts_without_php_doc(): void
+    {
+        $data = $this->data->cat();
+        $cat = new CatNoPhpDoc($data);
+
+        $this->assertEquals($data['id'], $cat->id);
+        $this->assertIsInt($cat->id);
+        $this->assertEquals($data['name'], $cat->name);
+        $this->assertIsString($cat->name);
+        $this->assertInstanceOf(CatColor::class, $cat->color);
+        $this->assertEquals(CatColor::tryFrom($data['color']), $cat->color);
+    }
+
+    public function test_bad_php_doc_parsing(): void
+    {
+        $data = $this->data->cat();
+        $cat = new CatBadPhpDoc($data);
+
+        $this->assertIsFloat($cat->id);
+        $this->assertIsArray($cat->name);
+        $this->assertInstanceOf(CatColor::class, $cat->color);
+        $this->assertInstanceOf(Carbon::class, $cat->birthday);
+        $this->assertIsBool($cat->smart);
+        $this->assertIsArray($cat->favoriteToys);
+        $this->assertIsArray($cat->favoriteToys[0]);
+        $this->assertIsArray($cat->favoriteFoods);
     }
 }

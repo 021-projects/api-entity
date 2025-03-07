@@ -94,6 +94,8 @@ trait HasCasts
                 return is_numeric($value)
                     ? Date::createFromTimestamp((int)$value)->timestamp
                     : Date::parse($value)->timestamp;
+            case 'enum':
+                return $arg::tryFrom($value);
             default:
                 if (! class_exists($cast)) {
                     return $value;
