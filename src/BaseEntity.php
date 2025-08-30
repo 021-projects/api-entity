@@ -98,7 +98,7 @@ class BaseEntity extends Collection
         $property = $this->propKey($key);
 
         $valueRaw = $this->offsetExists($property)
-            ? $this->items[$property]
+            ? ($this->items[$property] ?? null)
             : value($default);
 
         if ($this->hasGetter($property)) {

@@ -37,6 +37,8 @@ class ResponseTest extends TestCase
 
     protected function setUp(): void
     {
+        error_reporting(E_ALL);
+
         $this->testJson = json_encode(self::TEST_USER, JSON_THROW_ON_ERROR);
     }
 

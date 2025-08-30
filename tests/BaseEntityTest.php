@@ -5,7 +5,6 @@ namespace Tests;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Date;
-use mysql_xdevapi\CollectionAdd;
 use O21\ApiEntity\Exception\InvalidJsonException;
 use PHPUnit\Framework\TestCase;
 use Tests\Entities\Cat;
@@ -27,6 +26,8 @@ class BaseEntityTest extends TestCase
 
     protected function setUp(): void
     {
+        error_reporting(E_ALL);
+
         $this->data = new Data();
         $this->user = new User($this->data->user());
     }
